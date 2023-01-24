@@ -13,7 +13,7 @@ ENA = 5
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(DIR_R, GPIO.OUT)
-GPIO.setup(DIR_L), GPIO.OUT)
+GPIO.setup(DIR_L, GPIO.OUT)
 GPIO.setup(ENA, GPIO.OUT)
 
 UDP_IP = "0.0.0.0" # listen to everything
@@ -49,7 +49,7 @@ try:
             throttle = float(control[2])*-100
 
         throttle_r = throttle + steer
-        throttle_l = throttle - steer
+        throttle_l = -throttle + steer
 
         print(throttle_r)
 
@@ -71,7 +71,7 @@ try:
         
         throttle_r = chr(int(abs(throttle_r)*0.93)+33).encode("utf-8")
         throttle_l = chr(int(abs(throttle_l)*0.93)+33).encode("utf-8")
-        
+
         nano_serial_R.write(throttle_r)
         nano_serial_L.write(throttle_l)
 

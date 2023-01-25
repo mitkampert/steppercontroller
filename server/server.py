@@ -9,11 +9,18 @@ nano_serial_L = serial.Serial('/dev/ttyUSB1', 9600)
 DIR_R = 6
 DIR_L = 16
 ENA = 5
+SERVO = 17
+
+DEFAULT = 7.5
+current_cam = DEFAULT
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(DIR_R, GPIO.OUT)
 GPIO.setup(DIR_L, GPIO.OUT)
 GPIO.setup(ENA, GPIO.OUT)
+GPIO.setup(SERVO, GPIO.OUT)
+cam = GPIO.PWM(SERVO, 50)
+cam.start(DEFAULT)
 
 UDP_IP = "0.0.0.0" # listen to everything
 UDP_PORT = 12342
@@ -25,13 +32,31 @@ sock.bind((UDP_IP, UDP_PORT))
 try:
     while True:
         data, addr = sock.recvfrom(512)
-        control = data.decode("utf-8").split(", ")
+        control = data.decode("utf-8").split(",")
 
         # arm / disarm handbrake
         if control[4] == "1":
             GPIO.output(ENA, False)
         elif control[4] == "0":
             GPIO.output(ENA, True)
+
+        # camera movement
+
+        # do nothing
+        if control[5] == "0":
+            pass
+        # move up
+        elif control[5] == "1":
+            if current_cam <= 11.5:
+                cam.ChangeDutyCycle(current_cam + 1)
+        # move down
+        elif control[5] == "2":
+            if current_cam >= 3.5:
+                cam.ChangeDutyCycle(current_cam - 1)
+        # reset position
+        elif control[5] == "3":
+            current_cam = DEFAULT
+            cam.ChangeDutyCycle(current_cam)
 
         # set steering input from gamepad
         if float(control[0]) > 0:

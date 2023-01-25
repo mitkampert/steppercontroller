@@ -5,6 +5,7 @@ pygame.init()
 
 forward = 1
 hbk = 1
+cam_action = 0
 
 joystick = pygame.joystick.Joystick(0)
 joystick.init()
@@ -35,11 +36,11 @@ while True:
             
         if event.type == pygame.JOYHATMOTION:
             if joystick.get_hat(0) == (0, 1):
-                sock.sendto(b'UP\n', (UDP_IP, UDP_PORT))
+                cam_action = 1
             elif joystick.get_hat(0) == (0, -1):
-                sock.sendto(b'DOWN\n', (UDP_IP, UDP_PORT))
+                cam_action = 2
             elif joystick.get_hat(0) == (1, 0):
-                sock.sendto(b'RESET\n', (UDP_IP, UDP_PORT))
+                cam_action = 3
 
     x_axis = round(joystick.get_axis(0), 2)
     if abs(x_axis) < 0.1:
@@ -58,6 +59,8 @@ while True:
     elif forward == 0:
         throttle = 0
     
-    sock.sendto(bytes(f"{x_axis}, {throttle}, {reverse}, {forward}, {hbk}", encoding='utf-8'), (UDP_IP, UDP_PORT))
+    sock.sendto(bytes(f"{x_axis},{throttle},{reverse},{forward},{hbk},{cam_action}", encoding='utf-8'), (UDP_IP, UDP_PORT))
+    print(cam_action)
 
+    cam_action = 0
     time.sleep(0.01)

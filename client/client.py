@@ -60,7 +60,6 @@ while True:
         throttle = 0
     
     sock.sendto(bytes(f"{x_axis},{throttle},{reverse},{forward},{hbk},{cam_action}", encoding='utf-8'), (UDP_IP, UDP_PORT))
-    print(cam_action)
 
     cam_action = 0
     time.sleep(0.01)

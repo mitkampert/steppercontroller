@@ -14,7 +14,7 @@ route = []
 joystick = pygame.joystick.Joystick(0)
 joystick.init()
 
-UDP_IP = "192.168.191.151"
+UDP_IP = "172.26.230.50"
 UDP_PORT = 12342
 
 print("UDP target IP:", UDP_IP)
@@ -101,10 +101,8 @@ while True:
             command = input("Next step: ").lower()
             while command != "fin":
                 if command == "manual":
-                    manual_mode = True
-                    confirmed = True
                     route.append("manual")
-                    break
+                    manual_mode = True
                 elif command == "clear":
                     print(f"\n{Fore.BLUE}list cleared{Fore.RESET}\n")
                     route = []
@@ -112,8 +110,8 @@ while True:
                     print(f'''Pre-programmed mode commands:
                     
 {Fore.RED}Control commands:{Fore.RESET}
-forward(x)  -   move x m forward.
-reverse(x)  -   move x m backwards.
+forward(x)  -   move x cm forward.
+reverse(x)  -   move x cm backwards.
 left(x)     -   move x degrees to the left.
 right(x)    -   move x degrees to the right.
 return      -   return to original position.
@@ -145,7 +143,7 @@ check   -   check if current program is valid.\n''')
 
             command = None
             check = None
-            while check != 'y' and check != 'n' and check != '' and not manual_mode:
+            while check != 'y' and check != 'n' and check != '':
                 print(f"\n{Fore.BLUE}Current program:{Fore.RESET}")
                 for commands in route:
                     print(commands)

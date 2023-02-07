@@ -8,7 +8,6 @@ nano_serial_R = serial.Serial('/dev/ttyUSB0', 9600)
 nano_serial_L = serial.Serial('/dev/ttyUSB1', 9600)
 # delay set on the Aruduino (us)
 DELAY = 1000
-STEP_TIME = (DELAY*10**-6)*2
 
 DIR_R = 6
 DIR_L = 16
@@ -39,7 +38,7 @@ sock.bind((UDP_IP, UDP_PORT))
 
 def to_signal(command, reverse):
     if command[0] == 'd':
-        steps = command[:-1]
+        steps = int(command[1:])*13
         if (steps > 0 and not reverse) or (steps < 0 and reverse):
             GPIO.output(DIR_R, True)
             GPIO.output(DIR_L, True)
@@ -50,29 +49,29 @@ def to_signal(command, reverse):
         # send signal
         
         # wait for motors to finish
-        time.sleep((steps*STEP_TIME) + 1)
+        time.sleep(abs((steps*DELAY*2*10**-6) + 1))
 
 
 
     elif command[0] == 't':
-        steps = command[:-1]
-        if (int(steps) > 0 and not reverse) or (int(steps) < 0 and reverse):
+        steps = int(command[1:]) * 10
+        if (steps > 0 and not reverse) or (steps < 0 and reverse):
             GPIO.output(DIR_R, True)
             GPIO.output(DIR_L, False)
             
 
-        elif (int(steps) < 0 and not reverse) or (int(steps) > 0 and reverse):
+        elif (steps < 0 and not reverse) or (steps > 0 and reverse):
             GPIO.output(DIR_R, False)
             GPIO.output(DIR_L, True)
 
         # send signal 
 
         # wait for motors to finish
-        time.sleep((steps*STEP_TIME) + 1)
+        time.sleep(abs((steps*DELAY*2*10**-6) + 1))
             
 
     elif command[0] == 'c':
-        cam.ChangedutyCycle(int(command[:-1]))
+        cam.ChangeDutyCycle(int(command[:-1]))
     elif command[0] == 'p':
         pass #run photo script
 
@@ -157,6 +156,7 @@ try:
             if data[1] == '0':
                 manual = False
                 GPIO.output(ARD_M, True)
+                
 
             elif data[1] == '1':
                 manual = True
@@ -165,6 +165,10 @@ try:
             while not manual:
                 route = []
                 done = []
+                data, addr = sock.recvfrom(512)
+                data = data.decode("utf-8")
+                if data[0] != 'c' and data[0] != 'x':
+                    route.append(data)
                 while data != 'x':
                     data, addr = sock.recvfrom(512)
                     data = data.decode("utf-8")
@@ -182,17 +186,16 @@ try:
                             if step == 'c' or step == 'p':
                                 pass
                             else:
-                                to_signal(step)
+                                to_signal(step, True)
+                                print(f"{step} done in reverse")
                         done = []
+                    elif command == "m1":
+                        manual = True
+                        GPIO.output(ARD_M, False)
                     else:
-                        done.append(command, True)
-                        
-
-                if 'm' in route:
-                    manual = True
-                    GPIO.output(ARD_M, False)
-
-                
+                        print(f"{command} done")
+                        done.append(command)
+                                     
 
 
 except KeyboardInterrupt:

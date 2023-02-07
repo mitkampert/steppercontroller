@@ -46,7 +46,8 @@ def to_signal(command, reverse):
             GPIO.output(DIR_R, False)
             GPIO.output(DIR_L, False)
 
-        # send signal
+        nano_serial_R.write(abs(steps))
+        nano_serial_L.write(abs(steps))
         
         # wait for motors to finish
         time.sleep(abs((steps*DELAY*2*10**-6) + 1))
@@ -64,7 +65,8 @@ def to_signal(command, reverse):
             GPIO.output(DIR_R, False)
             GPIO.output(DIR_L, True)
 
-        # send signal 
+        nano_serial_R.write(abs(steps))
+        nano_serial_L.write(abs(steps))
 
         # wait for motors to finish
         time.sleep(abs((steps*DELAY*2*10**-6) + 1))

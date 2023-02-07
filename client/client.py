@@ -9,7 +9,6 @@ forward = 1
 hbk = 0
 cam_action = 0
 manual_mode = True
-mode = 1
 route = []
 
 joystick = pygame.joystick.Joystick(0)
@@ -23,27 +22,30 @@ print("UDP target port:", UDP_PORT)
 
 sock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
 
-def decode(command):
+def compress(command):
     if command == "return":
         result = 'r'
     elif command == "manual":
-        result = 'm'
+        result = 'm1'
+    elif command == "photo":
+        result = 'p'
     else:
         command = command.split('(')
         if command[0] == "forward":
-            result = f"f{command[1][:-1]}"
+            result = f"d{command[1][:-1]}"
         elif command[0] == "reverse":
-            result = f"r{command[1][:-1]}"
+            result = f"d-{command[1][:-1]}"
         elif command[0] == "left":
             result = f"t{command[1][:-1]}"
         elif command[0] == "right":
             result = f"t-{command[1][:-1]}"
+        elif command[0] == "cam":
+            result = f"c{command[1][:-1]}"
 
     return result
 
 
 while True:
-    mode = 1
     print(f"{Fore.GREEN}Entered manual mode.{Fore.RESET}")
     while manual_mode == True:
         for event in pygame.event.get():
@@ -57,8 +59,8 @@ while True:
                 # elif joystick.get_button(2):
                 #     print("x")
                 elif joystick.get_button(3):
+                    sock.sendto(bytes(f"m0", encoding='utf-8'), (UDP_IP, UDP_PORT))
                     manual_mode = False
-                    mode = 0
                 # elif joystick.get_button(4):
                 #     print("lb")
                 
@@ -87,7 +89,7 @@ while True:
         elif forward == 0:
             throttle = 0
         
-        sock.sendto(bytes(f"{x_axis},{throttle},{reverse},{forward},{hbk},{cam_action},{mode}", encoding='utf-8'), (UDP_IP, UDP_PORT))
+        sock.sendto(bytes(f"c{x_axis},{throttle},{reverse},{forward},{hbk},{cam_action}", encoding='utf-8'), (UDP_IP, UDP_PORT))
 
         cam_action = 0
         time.sleep(0.01)
@@ -110,11 +112,13 @@ while True:
                     print(f'''Pre-programmed mode commands:
                     
 {Fore.RED}Control commands:{Fore.RESET}
-forward(x)  -   move x cm forward.
-reverse(x)  -   move x cm backwards.
+forward(x)  -   move x m forward.
+reverse(x)  -   move x m backwards.
 left(x)     -   move x degrees to the left.
 right(x)    -   move x degrees to the right.
-return      -   return to original position.      
+return      -   return to original position.
+cam(x)      -   move camera. 0 = flat, pos = up, neg = down. Range = (3.5 , 11.5)   
+photo       -   captures a photo with the camera.   
 
 {Fore.RED}Other commands:{Fore.RESET}
 fin     -   finish command sequence.
@@ -127,7 +131,7 @@ check   -   check if current program is valid.\n''')
                 elif command == 'check':
                     try:
                         for commands in route:
-                            raw_command = decode(commands)
+                            raw_command = compress(commands)
                         print(f"{Fore.BLUE}Program valid.{Fore.RESET}")
                     except:
                         print(f"{Fore.RED}Program error. Please reset and try again.{Fore.RESET}")
@@ -153,7 +157,7 @@ check   -   check if current program is valid.\n''')
 
         try:
             for commands in route:
-                raw_command = decode(commands)
+                raw_command = compress(commands)
                 sock.sendto(bytes(raw_command, encoding='utf-8'), (UDP_IP, UDP_PORT))
             sock.sendto(bytes('x', encoding='utf-8'), (UDP_IP, UDP_PORT))
             print(f"{Fore.GREEN}program sent.{Fore.RESET}\n")

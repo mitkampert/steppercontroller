@@ -25,6 +25,8 @@ void setup() {
   Serial.begin(9600);
 }
 
+void(* resetFunc) (void) = 0;
+
 void loop() {
   digitalWrite(LED_BUILTIN, LOW);
   throt = 0;
@@ -54,7 +56,9 @@ void loop() {
       delayMicroseconds(50000/throt); 
     } 
   }
-  
+
+  digitalWrite(ENA, LOW);
+
   digitalWrite(LED_BUILTIN, HIGH);
   steps = 0;
   while (digitalRead(MANUAL) == 1) {

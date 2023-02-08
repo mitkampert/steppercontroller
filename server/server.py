@@ -166,7 +166,6 @@ try:
                 manual = True
                 GPIO.output(ARD_M, False)
 
-            time.sleep(1)
             while not manual:
                 route = []
                 done = []
@@ -200,8 +199,6 @@ try:
                     else:
                         print(f"{command} done")
                         done.append(command)
-            
-            time.sleep(1)
                                      
 
 

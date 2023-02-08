@@ -2,8 +2,22 @@ import socket
 import time
 import pygame
 from colorama import Fore
+from datetime import timedelta
 
 pygame.init()
+WIDTH = 1920
+HEIGHT = 720
+scr = pygame.display.set_mode((WIDTH, HEIGHT))
+ 
+# set the pygame window name
+pygame.display.set_caption('CMS')
+
+imp = pygame.image.load("client/img/rov.png").convert()
+imp = pygame.transform.scale(imp,(468*0.6, 842*0.6))
+
+pp_msg = pygame.image.load("client/img/pp-msg.png").convert_alpha()
+
+font = pygame.font.SysFont("freemono", 30)
 
 forward = 1
 hbk = 0
@@ -44,8 +58,92 @@ def compress(command):
 
     return result
 
+def generate_window(vl, vr, steer, hbk):
+    scr.fill((0,0,0))
+    scr.blit(imp, (WIDTH/2 - (468*0.6)/2, 40))
 
+    t = time.time()
+    td = timedelta(seconds=int(t-start))
+    t_main = font.render("Mission duration:", True, (0, 255, 4))
+    t_text = font.render(f"t = +{td}", True, (0, 255, 4))
+
+    vl_main = font.render("Left track:", True, (0, 255, 4))
+    vr_main = font.render("Right track:", True, (0, 255, 4))
+
+    if hbk == 1:
+        hbk_text = font.render("Handbrake: ON", True, (0, 255, 4))
+    elif hbk == 0:
+        hbk_text = font.render("Handbrake: OFF", True, (255, 0, 0))
+    else:
+        hbk_text = font.render("Handbrake: N/A", True, (255, 0, 0))
+
+    if vl != 0:
+        vl = (60*10**6)/((50000/(100*vl))*800)
+    if abs(vl) < 8:
+        vl = 0
+    if vl > 150:
+        vl = 150
+    elif vl < -150:
+        vl = -150
+
+    if vr != 0:
+        vr = (60*10**6)/((50000/(100*vr))*800)
+    if abs(vr) < 8:
+        vr = 0
+    if vr > 150:
+        vr = 150
+    elif vr < -150:
+        vr = -150
+
+    vl_tacho = font.render(f"{int(vl)} RPM", True, (0, 255, 4))
+    vr_tacho = font.render(f"{int(vr)} RPM", True, (0, 255, 4))
+
+    if steer == 0:
+        pygame.draw.rect(scr, (0, 255, 4), pygame.Rect(400, 620, 1920-800, 75), 2)
+        pygame.draw.rect(scr, (0, 255, 4), pygame.Rect((1920/2)-1, 625, 2, 65))
+    elif steer > 0:
+        pygame.draw.rect(scr, (0, 255, 4), pygame.Rect(400, 620, 1920-800, 75), 2)
+        pygame.draw.rect(scr, (0, 255, 4), pygame.Rect((1920/2)-1, 625, 2+(steer*555), 65))
+    elif steer < 0:
+        pygame.draw.rect(scr, (0, 255, 4), pygame.Rect(400, 620, 1920-800, 75), 2)
+        pygame.draw.rect(scr, (0, 255, 4), pygame.Rect(int((1920/2)-1+(steer*555)), 625, int((-steer*555)+2), 65))
+
+    vlt = vl*1.2
+    vrt = vr*1.2
+
+    if vlt <= 0:
+        pygame.draw.rect(scr, (0, 255, 4), pygame.Rect(838, 310, 24, 2-vlt))
+    elif vlt > 0:
+        pygame.draw.rect(scr, (0, 255, 4), pygame.Rect(838, 310-vlt, 24, 2+vlt))
+    if vrt <= 0:
+        pygame.draw.rect(scr, (0, 255, 4), pygame.Rect(1058, 310, 24, 2-vrt))
+    elif vrt > 0:
+        pygame.draw.rect(scr, (0, 255, 4), pygame.Rect(1058, 310-vrt, 24, 2+vrt))
+
+
+
+    scr.blit(t_main, (10, 10))
+    scr.blit(t_text, (10, 40))
+
+    scr.blit(vl_main, (550, 300))
+    scr.blit(vr_main, (WIDTH-750, 300))
+
+    scr.blit(vl_tacho, (580, 350))
+    scr.blit(vr_tacho, (WIDTH-710, 350))
+
+    scr.blit(hbk_text, (1600, 10))
+
+
+    if hbk == 2:
+        scr.blit(pp_msg, (0, 0))
+    
+    pygame.display.flip()
+
+pygame.display.flip()
+
+start = time.time()
 while True:
+    generate_window(0, 0, 0, 2)
     print(f"{Fore.GREEN}Entered manual mode.{Fore.RESET}")
     while manual_mode == True:
         for event in pygame.event.get():
@@ -92,10 +190,18 @@ while True:
         sock.sendto(bytes(f"c{x_axis},{throttle},{reverse},{forward},{hbk},{cam_action}", encoding='utf-8'), (UDP_IP, UDP_PORT))
 
         cam_action = 0
+
+        if forward == 1:
+                throttle_cms = throttle
+        elif forward == 0:
+            throttle_cms = -reverse
+
+        generate_window(throttle_cms + x_axis, throttle_cms - x_axis, x_axis, hbk)
         time.sleep(0.01)
     
     print(f"{Fore.GREEN}Entered pre-programmed route  -  type 'help' to get a list of available commands.{Fore.RESET}\n")
     while manual_mode == False:
+        generate_window(0, 0, 0, 2)
         confirmed = False
         while not confirmed:
             command = input("Next step: ").lower()

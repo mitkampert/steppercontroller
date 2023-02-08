@@ -10,12 +10,13 @@ int ENA = 11;
 
 
 int throt = 0;
-int steps = 0;
+long steps = 0;
 
 void setup() {
   pinMode(DIR, OUTPUT);
   pinMode(PUL, OUTPUT);
   pinMode(ENA, OUTPUT);
+  pinMode(LED_BUILTIN, OUTPUT);
   
   pinMode(ENA_PI, INPUT);
   pinMode(DIR_PI, INPUT);
@@ -25,7 +26,8 @@ void setup() {
 }
 
 void loop() {
-
+  digitalWrite(LED_BUILTIN, LOW);
+  throt = 0;
   while (digitalRead(MANUAL) == 0) {
     if (Serial.available() > 0) {
       throt = Serial.read() - 33;
@@ -52,10 +54,11 @@ void loop() {
       delayMicroseconds(50000/throt); 
     } 
   }
+  
+  digitalWrite(LED_BUILTIN, HIGH);
+  steps = 0;
   while (digitalRead(MANUAL) == 1) {
-    if (Serial.available() > 0) {
-      steps = Serial.parseInt(SKIP_ALL, '\n');
-    }
+    steps = Serial.parseInt();
 
     if (digitalRead(DIR_PI) == 0) {
       digitalWrite(DIR, LOW);
@@ -70,5 +73,6 @@ void loop() {
       digitalWrite(PUL, LOW);    
       delayMicroseconds(1000);
     }
+    steps = 0;
   }                    
 }

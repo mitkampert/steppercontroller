@@ -46,8 +46,9 @@ def to_signal(command, reverse):
             GPIO.output(DIR_R, False)
             GPIO.output(DIR_L, False)
 
-        nano_serial_R.write(abs(steps))
-        nano_serial_L.write(abs(steps))
+        n = f"{abs(steps)} ".encode("utf-8")
+        nano_serial_R.write(n)
+        nano_serial_L.write(n)
         
         # wait for motors to finish
         time.sleep(abs((steps*DELAY*2*10**-6) + 1))
@@ -65,8 +66,9 @@ def to_signal(command, reverse):
             GPIO.output(DIR_R, False)
             GPIO.output(DIR_L, True)
 
-        nano_serial_R.write(abs(steps))
-        nano_serial_L.write(abs(steps))
+        n = f"{abs(steps)} ".encode("utf-8")
+        nano_serial_R.write(n)
+        nano_serial_L.write(n)
 
         # wait for motors to finish
         time.sleep(abs((steps*DELAY*2*10**-6) + 1))
@@ -164,6 +166,7 @@ try:
                 manual = True
                 GPIO.output(ARD_M, False)
 
+            time.sleep(1)
             while not manual:
                 route = []
                 done = []
@@ -197,10 +200,11 @@ try:
                     else:
                         print(f"{command} done")
                         done.append(command)
+            
+            time.sleep(1)
                                      
 
 
 except KeyboardInterrupt:
     print("cleanup")
     GPIO.cleanup()
-

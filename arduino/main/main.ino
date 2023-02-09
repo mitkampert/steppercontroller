@@ -25,8 +25,6 @@ void setup() {
   Serial.begin(9600);
 }
 
-void(* resetFunc) (void) = 0;
-
 void loop() {
   digitalWrite(LED_BUILTIN, LOW);
   throt = 0;

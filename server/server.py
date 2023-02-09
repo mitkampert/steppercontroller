@@ -51,7 +51,7 @@ def to_signal(command, reverse):
         nano_serial_L.write(n)
         
         # wait for motors to finish
-        time.sleep(abs((steps*DELAY*2*10**-6) + 1))
+        time.sleep((abs(steps)*DELAY*2*10**-6) + 1)
 
 
 
@@ -71,7 +71,7 @@ def to_signal(command, reverse):
         nano_serial_L.write(n)
 
         # wait for motors to finish
-        time.sleep(abs((steps*DELAY*2*10**-6) + 1))
+        time.sleep((abs(steps)*DELAY*2*10**-6) + 1)
             
 
     elif command[0] == 'c':

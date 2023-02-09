@@ -222,7 +222,8 @@ left(x)     -   move x degrees to the left.
 right(x)    -   move x degrees to the right.
 return      -   return to original position.
 cam(x)      -   move camera. 0 = flat, pos = up, neg = down. Range = (3.5 , 11.5)   
-photo       -   captures a photo with the camera.   
+photo       -   captures a photo with the camera.  
+manual      -   return to manual mode. 
 
 {Fore.RED}Other commands:{Fore.RESET}
 fin     -   finish command sequence.

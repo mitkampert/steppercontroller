@@ -42,9 +42,16 @@ sock.bind((UDP_IP, UDP_PORT))
 def take_photo():
     n = len(os.listdir("images/"))
     cap = cv2.VideoCapture(1)
-    ret, frame = cap.read()
-    cv2.imwrite(f"images/picam{n}.jpg", frame)
-    cap.release()
+
+    try:
+        cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+
+        ret, frame = cap.read()
+        cv2.imwrite(f"images/picam{n}.jpg", frame)
+        cap.release()
+    except:
+        print("[ ERROR ] Image failed")
 
 
 def to_signal(command, reverse):

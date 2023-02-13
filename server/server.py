@@ -2,6 +2,8 @@ import socket
 import RPi.GPIO as GPIO
 import serial
 import time
+import cv2
+import os
 
 # set serial connection with Arduino, default baud rate = 9600
 nano_serial_R = serial.Serial('/dev/ttyUSB0', 9600)
@@ -36,7 +38,16 @@ UDP_PORT = 12342
 sock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
 sock.bind((UDP_IP, UDP_PORT))
 
-def to_signal(command, reverse):
+
+def take_photo():
+    n = len(os.listdir("images/"))
+    cap = cv2.VideoCapture(1)
+    ret, frame = cap.read()
+    cv2.imwrite(f"images/picam{n}", frame)
+    cap.release()
+
+
+def to_signal(command, reverse, pic):
     if command[0] == 'd':
         steps = int(command[1:])*13
         if (steps > 0 and not reverse) or (steps < 0 and reverse):
@@ -77,7 +88,7 @@ def to_signal(command, reverse):
     elif command[0] == 'c':
         cam.ChangeDutyCycle(int(command[:-1]))
     elif command[0] == 'p':
-        pass #run photo script
+        take_photo() 
 
 try:
     while True:
@@ -156,10 +167,13 @@ try:
             nano_serial_R.write(throttle_r)
             nano_serial_L.write(throttle_l)
 
-        elif data[0] == 'm':
-            if data[1] == '0':
-                manual = False
-                GPIO.output(ARD_M, True)
+        else:
+            if data[0] == 'm':
+                if data[1] == '0':
+                    manual = False
+                    GPIO.output(ARD_M, True)
+            elif data[0] == 'p':
+                take_photo()
                 
 
             elif data[1] == '1':

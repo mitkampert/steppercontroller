@@ -150,8 +150,8 @@ while True:
             if event.type == pygame.JOYBUTTONDOWN:
                 if joystick.get_button(5):
                     hbk = abs(hbk-1)
-                # elif joystick.get_button(0):
-                #     print("a")
+                elif joystick.get_button(0):
+                    sock.sendto(bytes(f"p", encoding='utf-8'), (UDP_IP, UDP_PORT))
                 # elif joystick.get_button(1):
                 #     print("b")
                 # elif joystick.get_button(2):

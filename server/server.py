@@ -43,11 +43,11 @@ def take_photo():
     n = len(os.listdir("images/"))
     cap = cv2.VideoCapture(1)
     ret, frame = cap.read()
-    cv2.imwrite(f"images/picam{n}", frame)
+    cv2.imwrite(f"images/picam{n}.jpg", frame)
     cap.release()
 
 
-def to_signal(command, reverse, pic):
+def to_signal(command, reverse):
     if command[0] == 'd':
         steps = int(command[1:])*13
         if (steps > 0 and not reverse) or (steps < 0 and reverse):

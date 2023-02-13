@@ -28,7 +28,8 @@ route = []
 joystick = pygame.joystick.Joystick(0)
 joystick.init()
 
-UDP_IP = "172.26.230.50"
+# UDP_IP = "172.26.230.50"
+UDP_IP = "192.168.191.151"
 UDP_PORT = 12342
 
 print("UDP target IP:", UDP_IP)

@@ -58,10 +58,10 @@ def to_signal(command, reverse):
     if command[0] == 'd':
         steps = int(command[1:])*13
         if (steps > 0 and not reverse) or (steps < 0 and reverse):
-            GPIO.output(DIR_R, False)
+            GPIO.output(DIR_R, True)
             GPIO.output(DIR_L, False)
         elif (steps < 0 and not reverse) or (steps > 0 and reverse):
-            GPIO.output(DIR_R, True)
+            GPIO.output(DIR_R, False)
             GPIO.output(DIR_L, True)
 
         n = f"{abs(steps)} ".encode("utf-8")
@@ -77,12 +77,12 @@ def to_signal(command, reverse):
         steps = int(command[1:]) * 10
         if (steps > 0 and not reverse) or (steps < 0 and reverse):
             GPIO.output(DIR_R, False)
-            GPIO.output(DIR_L, True)
+            GPIO.output(DIR_L, False)
             
 
         elif (steps < 0 and not reverse) or (steps > 0 and reverse):
             GPIO.output(DIR_R, True)
-            GPIO.output(DIR_L, False)
+            GPIO.output(DIR_L, True)
 
         n = f"{abs(steps)} ".encode("utf-8")
         nano_serial_R.write(n)
